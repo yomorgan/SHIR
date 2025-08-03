@@ -21,21 +21,24 @@ def is_admin():
     except:
         return False
 
-def get_installed_file_path():
-    value = None
-    is_released_agent = False
-    try:
-        base_key = winreg.HKEY_LOCAL_MACHINE
-        new_registry_key = winreg.OpenKey(base_key, new_registry_path, 0, winreg.KEY_READ)
-        value, _ = winreg.QueryValueEx(new_registry_key, diacmd_path)
-    except FileNotFoundError:
-        try:
-            old_registry_key = winreg.OpenKey(base_key, old_registry_path, 0, winreg.KEY_READ)
-            value, _ = winreg.QueryValueEx(old_registry_key, service_dll_path)
-            is_released_agent = True
-        except FileNotFoundError:
-            pass
-    return value, is_released_agent
+def get_installed_file_path():  
+    value = None  
+    is_released_agent = False  
+    try:  
+        base_key = winreg.HKEY_LOCAL_MACHINE  
+        new_registry_key = winreg.OpenKey(base_key, new_registry_path, 0, winreg.KEY_READ)  
+        value, _ = winreg.QueryValueEx(new_registry_key, diacmd_path)  
+    except FileNotFoundError as e:  
+        print(f"Registry path not found: {new_registry_path} or value {diacmd_path} missing ({e})")  
+        try:  
+            old_registry_key = winreg.OpenKey(base_key, old_registry_path, 0, winreg.KEY_READ)  
+            value, _ = winreg.QueryValueEx(old_registry_key, service_dll_path)  
+            is_released_agent = True  
+        except FileNotFoundError as e2:  
+            print(f"Registry path not found: {old_registry_path} or value {service_dll_path} missing ({e2})")  
+    except Exception as e:  
+        print(f"Unexpected error while reading registry: {e}")  
+    return value, is_released_agent  
 
 def register_one_agent():
     if not is_register_on_remote_machine:
